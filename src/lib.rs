@@ -33,7 +33,7 @@ mod tests {
     #[test]
     fn test_set_pos_2d_with_e() {
         let p = Point2d { x: 125.0, y: 125.0 };
-        let gcode = set_pos_2d(p, Some(90));
+        let gcode = set_pos_2d(p, Some(90.0));
         assert_eq!("G92 X125 Y125 E90", gcode);
     }
 
@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn test_set_pos_3d_with_e() {
         let p = Point3d { x: 125.0, y: 125.0, z: 25.0 };
-        let gcode = set_pos_3d(p, Some(90));
+        let gcode = set_pos_3d(p, Some(90.0));
         assert_eq!("G92 X125 Y125 Z25 E90", gcode);
     }
 }

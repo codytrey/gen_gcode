@@ -1,5 +1,7 @@
 # gen_gcode
 
+[![DocStatus](https://docs.rs/gen_gcode/badge.svg)](https://docs.rs/gen_gcode) [![dependency status](https://deps.rs/repo/github/codytrey/gen_gcode/status.svg)](https://deps.rs/repo/github/codytrey/gen_gcode)
+
 A simple g-code generator writen in rust.
 
 ## What is gen_gcode?
