@@ -8,6 +8,7 @@ repository = "https://github.com/codytrey/gen_gcode"
 readme = "README.md"
 keywords = ["gcode", "g-code", "3d", "printer", "printing"]
 description = "A functional G-Code generator"
+categories = ["parser-implementations", "parsing", "science::robotics"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
