@@ -21,4 +21,4 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Code Coverage
-      run: sudo install kcov && cargo install cargo-kcov && cargo kcov && bash <(curl -s https://codecov.io/bash) -f target/cov/index.html && echo "Uploaded code coverage"
+      run: sudo apt-get install -y kcov && cargo install cargo-kcov && cargo kcov && bash <(curl -s https://codecov.io/bash) -f target/cov/index.html && echo "Uploaded code coverage"
