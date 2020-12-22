@@ -12,7 +12,7 @@ env:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -21,4 +21,4 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Code Coverage
-      run: sudo apt-get install -y kcov && cargo install cargo-kcov && cargo kcov && bash <(curl -s https://codecov.io/bash) -f target/cov/index.html && echo "Uploaded code coverage"
+      run: sudo apt-get update && sudo apt-get install -y kcov && cargo install cargo-kcov && cargo kcov && bash <(curl -s https://codecov.io/bash) -f target/cov/index.html && echo "Uploaded code coverage"
