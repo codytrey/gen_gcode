@@ -106,7 +106,7 @@ pub struct Point3d {
 /// let p = Point2d { x: 10.0, y: 5.0 };
 /// // move without extruding
 /// let gcode = move_xy(p, false, None, None);
-/// assert_eq!("G0 X10 Y5", gcode);
+/// assert_eq!("G0 X10 Y5\n", gcode);
 /// ```
 /// 
 /// ```
@@ -116,7 +116,7 @@ pub struct Point3d {
 /// let p = Point2d { x: 10.0, y: 5.0 };
 /// // move with extrude
 /// let gcode = move_xy(p, true, None, None);
-/// assert_eq!("G1 X10 Y5", gcode);
+/// assert_eq!("G1 X10 Y5\n", gcode);
 /// ```
 /// 
 pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
@@ -172,12 +172,12 @@ pub fn move_z(z: f32) -> String {
 /// # Examples
 /// ```
 /// extern crate gen_gcode;
-/// use gen_gcode::{Point2d, move_xy};
+/// use gen_gcode::{Point2d, move_xy_arc_ij};
 /// 
 /// let p = Point2d { x: 125.0, y: 0.0 };
 /// // Create a Clockwise 180 degree Arc starting at 0,0 ending at 125,0 with center point 62.5,0
 /// let gcode = move_xy_arc_ij(Some(p), Some(62.5), None, None, false);
-/// assert_eq!("G2 X125 Y0 I62.5", gcode);
+/// assert_eq!("G2 X125 Y0 I62.5\n", gcode);
 /// ```
 pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Option<f32>, flow_rate: Option<f32>, ccw: bool) -> String {
     let x_str: String;
@@ -247,11 +247,11 @@ pub fn relative_positioning() -> String {
 /// # Examples
 /// ```
 /// extern crate gen_gcode;
-/// use gen_gcode::{Point2d, move_xy};
+/// use gen_gcode::{Point2d, set_pos_2d};
 /// 
 /// let p = Point2d { x: 125.0, y: 125.0 };
 /// let gcode = set_pos_2d(p, None);
-/// assert_eq!("G92 X125 Y125", gcode);
+/// assert_eq!("G92 X125 Y125\n", gcode);
 /// ```
 pub fn set_pos_2d(pos: Point2d, extrude_pos: Option<f32>) -> String {
     let e_str: String;
@@ -268,11 +268,11 @@ pub fn set_pos_2d(pos: Point2d, extrude_pos: Option<f32>) -> String {
 /// # Examples
 /// ```
 /// extern crate gen_gcode;
-/// use gen_gcode::{Point2d, move_xy};
+/// use gen_gcode::{Point3d, set_pos_3d};
 /// 
 /// let p = Point3d { x: 125.0, y: 125.0, z: 25.0};
 /// let gcode = set_pos_3d(p, None);
-/// assert_eq!("G92 X125 Y125 Z25", gcode);
+/// assert_eq!("G92 X125 Y125 Z25\n", gcode);
 /// ```
 pub fn set_pos_3d(pos: Point3d, extrude_pos: Option<f32>) -> String {
     let e_str: String;
