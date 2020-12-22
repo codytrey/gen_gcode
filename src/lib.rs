@@ -66,10 +66,10 @@ mod tests {
 /// let p4 = Point2d { x: 0.0, y: 10.0 };
 /// let square: Vec<Point2d> = vec!(p1, p2, p3, p4);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Point2d {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
 }
 
 /// Defines a 3 dimentional point in the XYZ catersian coordanant system
@@ -89,11 +89,11 @@ pub struct Point2d {
 /// let p8 = Point3d { x: 0.0, y: 0.0, z: 10.0 };
 /// let cube: Vec<Point3d> = vec!(p1, p2, p3, p4, p5, p6, p7, p8);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Point3d {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 /// Returns a G1 or G0 command as a String
@@ -119,7 +119,7 @@ pub struct Point3d {
 /// assert_eq!("G1 X10 Y5", gcode);
 /// ```
 /// 
-pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u8>, flow_rate: Option<u8>) -> String {
+pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
     let f_str: String;
     let e_str: String;
     if let Some(maybe_feed_rate) = feed_rate {
@@ -134,11 +134,37 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u8>, flow_rate: Op
         } else {
             e_str = format!("");
         }
-        return format!("G1 X{x} Y{y}{e}{f}", x=dest.x, y=dest.y, e=e_str, f=f_str)
+        return format!("G1 X{x} Y{y}{e}{f}\n", x=dest.x, y=dest.y, e=e_str, f=f_str)
     } else {
-        return format!("G0 X{x} Y{y}{f}", x=dest.x, y=dest.y, f=f_str)
+        return format!("G0 X{x} Y{y}{f}\n", x=dest.x, y=dest.y, f=f_str)
     }
 
+}
+
+pub fn move_xyz(dest:Point3d, extrude: bool, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
+    let f_str: String;
+    let e_str: String;
+    if let Some(maybe_feed_rate) = feed_rate {
+        f_str = format!(" F{}", maybe_feed_rate);
+    } else {
+        f_str = format!("");
+    }
+    
+    if extrude {
+        if let Some(maybe_flow_rate) = flow_rate {
+            e_str = format!(" E{}", maybe_flow_rate);
+        } else {
+            e_str = format!("");
+        }
+        return format!("G1 X{x} Y{y} Z{z}{e}{f}\n", x=dest.x, y=dest.y, z=dest.z, e=e_str, f=f_str)
+    } else {
+        return format!("G0 X{x} Y{y} Z{z}{f}\n", x=dest.x, y=dest.y, z=dest.z, f=f_str)
+    }
+
+}
+
+pub fn move_z(z: f32) -> String {
+    return format!("G0 Z{}", z)
 }
 
 /// Returns a G2 or G3 command as a String
@@ -153,7 +179,7 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u8>, flow_rate: Op
 /// let gcode = move_xy_arc_ij(Some(p), Some(62.5), None, None, false);
 /// assert_eq!("G2 X125 Y0 I62.5", gcode);
 /// ```
-pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Option<f32>, flow_rate: Option<u8>, ccw: bool) -> String {
+pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Option<f32>, flow_rate: Option<f32>, ccw: bool) -> String {
     let x_str: String;
     let y_str: String;
     let i_str: String;
@@ -182,9 +208,9 @@ pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Op
         e_str = format!("");
     }
     if ccw {
-        return format!("G3{x}{y}{i}{j}{e}", i=i_str, j=j_str, x=x_str, y=y_str, e=e_str);
+        return format!("G3{x}{y}{i}{j}{e}\n", i=i_str, j=j_str, x=x_str, y=y_str, e=e_str);
     } else {
-        return format!("G2{x}{y}{i}{j}{e}", i=i_str, j=j_str, x=x_str, y=y_str, e=e_str);
+        return format!("G2{x}{y}{i}{j}{e}\n", i=i_str, j=j_str, x=x_str, y=y_str, e=e_str);
     }
 }
 
@@ -192,28 +218,28 @@ pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Op
 ///
 /// Sets units to millimeters
 pub fn use_millimeters() -> String {
-    return format!("G21 ; set units to millimeters")
+    return format!("G21 ; set units to millimeters\n")
 }
 
 /// Returns a G20 command as a String
 /// 
 /// Sets units to inches
 pub fn use_inches() -> String {
-    return format!("G20 ; set units to inches")
+    return format!("G20 ; set units to inches\n")
 }
 
 /// Returns a G90 command as a String
 /// 
 /// sets all axes to absolute positioning (relative to home, ie. (0,0))
 pub fn absolute_positioning() -> String {
-    return format!("G90 ; Set all axes to absolute")
+    return format!("G90 ; Set all axes to absolute\n")
 }
 
 /// Returns a G91 command as a String
 /// 
 /// sets all axes to relative positioning (relative to nozzle/tool position)
 pub fn relative_positioning() -> String {
-    return format!("G91 ; Set all axes to relative")
+    return format!("G91 ; Set all axes to relative\n")
 }
 
 /// Returns a G92 command to set the current nozzle/tool possition in the XY plane as a String
@@ -227,14 +253,14 @@ pub fn relative_positioning() -> String {
 /// let gcode = set_pos_2d(p, None);
 /// assert_eq!("G92 X125 Y125", gcode);
 /// ```
-pub fn set_pos_2d(pos: Point2d, extrude_pos: Option<u8>) -> String {
+pub fn set_pos_2d(pos: Point2d, extrude_pos: Option<f32>) -> String {
     let e_str: String;
     if let Some(maybe_extrude_pos) = extrude_pos {
         e_str = format!(" E{}", maybe_extrude_pos);
     } else {
         e_str = format!("");
     }
-    return format!("G92 X{x} Y{y}{e}", x=pos.x, y=pos.y, e=e_str)
+    return format!("G92 X{x} Y{y}{e}\n", x=pos.x, y=pos.y, e=e_str)
 }
 
 /// Returns a G92 command to set the current nozzle/tool possition in 3 dimentions (XYZ) as a String
@@ -248,73 +274,89 @@ pub fn set_pos_2d(pos: Point2d, extrude_pos: Option<u8>) -> String {
 /// let gcode = set_pos_3d(p, None);
 /// assert_eq!("G92 X125 Y125 Z25", gcode);
 /// ```
-pub fn set_pos_3d(pos: Point3d, extrude_pos: Option<u8>) -> String {
+pub fn set_pos_3d(pos: Point3d, extrude_pos: Option<f32>) -> String {
     let e_str: String;
     if let Some(maybe_extrude_pos) = extrude_pos {
         e_str = format!(" E{}", maybe_extrude_pos);
     } else {
         e_str = format!("");
     }
-    return format!("G92 X{x} Y{y} Z{z}{e}", x=pos.x, y=pos.y, z=pos.z, e=e_str)
+    return format!("G92 X{x} Y{y} Z{z}{e}\n", x=pos.x, y=pos.y, z=pos.z, e=e_str)
+}
+
+pub fn reset_extruder(extrude_pos: f32) -> String {
+    return format!("G92 E{}\n", extrude_pos)
 }
 
 /// Returns a G92.1 command to reset to machine's native possitioning offsets as a String
 pub fn reset_pos() -> String {
-    return format!("G92.1")
+    return format!("G92.1\n")
 }
 
-pub fn set_hotend_temp(temp: u8, hotend: Option<u8>) -> String {
-    let t_str = String;
+pub fn set_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
+    let t_str: String;
     if let Some(maybe_hotend) = hotend {
         t_str = format!(" T{}", maybe_hotend);
     } else {
         t_str = format!("");
     }
-    return format!("M104 S{s}{t}", s=temp, t=t_str)
+    return format!("M104 S{s}{t}\n", s=temp, t=t_str)
 }
 
-pub fn wait_hotend_temp(temp: u8, hotend: Option<u8>) -> String {
-    let t_str = String;
+pub fn wait_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
+    let t_str: String;
     if let Some(maybe_hotend) = hotend {
         t_str = format!(" T{}", maybe_hotend);
     } else {
         t_str = format!("");
     }
-    return format!("M109 S{s}{t}", s=temp, t=t_str)
+    return format!("M109 S{s}{t}\n", s=temp, t=t_str)
 }
 
 pub fn set_fan_speed(speed: u8, fan: Option<u8>) -> String {
-    let p_str = String;
+    let p_str: String;
     if let Some(maybe_fan) = fan {
         p_str = format!(" P{}", maybe_fan);
     } else {
         p_str = format!("");
     }
-    return format!("M106 S{s}{p}", s=speed, p=p_str)
+    return format!("M106 S{s}{p}\n", s=speed, p=p_str)
 }
 
 pub fn fan_off(fan: Option<u8>) -> String {
-    let p_str = String;
+    let p_str: String;
     if let Some(maybe_fan) = fan {
         p_str = format!(" P{}", maybe_fan);
     } else {
         p_str = format!("");
     }
-    return format!("M107{p}", p=p_str)
+    return format!("M107{p}\n", p=p_str)
 }
 
 pub fn set_bed_temp(temp: u8) -> String {
-    return format!("M140 S{}", temp)
+    return format!("M140 S{}\n", temp)
 }
 
 pub fn wait_bed_temp(temp: u8) -> String {
-    return format!("M190 S{}", temp)
+    return format!("M190 S{}\n", temp)
 }
 
 pub fn set_chamber_temp(temp: u8) -> String {
-    return format!("M141 S{}", temp)
+    return format!("M141 S{}\n", temp)
 }
 
 pub fn wait_chamber_temp(temp: u8) -> String {
-    return format!("M191 S{}", temp)
+    return format!("M191 S{}\n", temp)
+}
+
+pub fn auto_home() -> String {
+    return format!("G28\n")
+}
+
+pub fn absolute_extrution() -> String {
+    return format!("M82")
+}
+
+pub fn relative_extrution() -> String {
+    return format!("M83")
 }
