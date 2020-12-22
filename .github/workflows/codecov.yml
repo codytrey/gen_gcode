@@ -16,9 +16,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@master
+    - uses: sudo-bot/action-kcov@latest
+      with:
+        cli-args: "--version"
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
         flags: unittests # optional
         name: codecov-umbrella # optional
         fail_ci_if_error: true # optional (default = false)
+        run: for file in target/debug/gen_gcode-*; do [ -x "${file}" ] || continue; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
