@@ -31,6 +31,16 @@ mod tests {
     }
 
     #[test]
+    fn test_arc_ij_full_circle() {
+        let p = Point2d { x: 220.0, y: 110.0 };
+        // Move to the point (220,110)
+        let _ = move_xy(p, false, None, None);
+        // Make a counter clockwise circle with centerpoint at (110,110)
+        let gcode = move_xy_arc_ij(None, Some(110.0), Some(110.0), Some(920.0), true);
+        assert_eq!("G3 I110 J110 E920\n", gcode);
+    }
+
+    #[test]
     fn test_set_pos_2d() {
         let p = Point2d { x: 125.0, y: 125.0 };
         let gcode = set_pos_2d(p, None);
@@ -63,6 +73,37 @@ mod tests {
         let gcode = reset_extruder(0.0);
         assert_eq!("G92 E0\n", gcode);
     }
+
+    #[test]
+    fn test_rest_pos() {
+        let gcode = reset_pos();
+        assert_eq!("G92.1\n", gcode);
+    }
+
+    #[test]
+    fn test_set_hotend_temp() {
+        let gcode = set_hotend_temp(210, None);
+        assert_eq!("M104 S210\n", gcode);
+    }
+
+    #[test]
+    fn test_set_hotend_temp_non_default_tool() {
+        let gcode = set_hotend_temp(210, Some(2));
+        assert_eq!("M104 S210 T2\n", gcode);
+    }
+
+    #[test]
+    fn test_wait_hotend_temp() {
+        let gcode = wait_hotend_temp(210, None);
+        assert_eq!("M109 S210\n", gcode);
+    }
+
+    #[test]
+    fn test_wait_hotend_temp_non_default_tool() {
+        let gcode = wait_hotend_temp(210, Some(2));
+        assert_eq!("M109 S210 T2\n", gcode);
+    }
+
 }
 
 
@@ -215,6 +256,18 @@ pub fn move_z(z: f32) -> String {
 /// let gcode = move_xy_arc_ij(Some(p), Some(62.5), None, None, false);
 /// assert_eq!("G2 X125 Y0 I62.5\n", gcode);
 /// ```
+/// 
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::{Point2d, move_xy, move_xy_arc_ij};
+/// 
+/// let p = Point2d { x: 220.0, y: 110.0 };
+/// // Move to the point (220,110)
+/// let _ = move_xy(p, false, None, None);
+/// // Make a counter clockwise circle with centerpoint at (110,110)
+/// let gcode = move_xy_arc_ij(None, Some(110.0), Some(110.0), Some(920.0), true);
+/// assert_eq!("G3 I110 J110 E920\n", gcode);
+/// ```
 pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Option<f32>, flow_rate: Option<f32>, ccw: bool) -> String {
     let x_str: String;
     let y_str: String;
@@ -326,6 +379,7 @@ pub fn set_pos_3d(pos: Point3d, extrude_pos: Option<f32>) -> String {
 /// ```
 /// extern crate gen_gcode;
 /// use gen_gcode::reset_extruder;
+/// 
 /// let gcode = reset_extruder(0.0);
 /// assert_eq!("G92 E0\n", gcode);
 /// ```
@@ -334,10 +388,39 @@ pub fn reset_extruder(extrude_pos: f32) -> String {
 }
 
 /// Returns a G92.1 command to reset to machine's native possitioning offsets as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::reset_pos;
+/// 
+/// let gcode = reset_pos();
+/// assert_eq!("G92.1\n", gcode);
+/// ```
 pub fn reset_pos() -> String {
     return format!("G92.1\n")
 }
 
+
+/// Returns a M104 command to set target hotend temp as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::set_hotend_temp;
+/// 
+/// let gcode = set_hotend_temp(210, None);
+/// assert_eq!("M104 S210\n", gcode);
+/// ```
+/// 
+/// To specify an extruder other than default (last active):
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::set_hotend_temp;
+/// // some(2) is the extruder index on the printer
+/// let gcode = set_hotend_temp(210, Some(2));
+/// assert_eq!("M104 S210 T2\n", gcode);
+/// ```
 pub fn set_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
     let t_str: String;
     if let Some(maybe_hotend) = hotend {
@@ -348,6 +431,25 @@ pub fn set_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
     return format!("M104 S{s}{t}\n", s=temp, t=t_str)
 }
 
+/// Returns a M109 command to set target hotend temp to wait to reach as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::wait_hotend_temp;
+/// 
+/// let gcode = wait_hotend_temp(210, None);
+/// assert_eq!("M109 S210\n", gcode);
+/// ```
+/// 
+/// To specify an extruder other than default (last active):
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::wait_hotend_temp;
+/// // some(2) is the extruder index on the printer
+/// let gcode = wait_hotend_temp(210, Some(2));
+/// assert_eq!("M109 S210 T2\n", gcode);
+/// ```
 pub fn wait_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
     let t_str: String;
     if let Some(maybe_hotend) = hotend {
