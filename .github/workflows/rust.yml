@@ -22,6 +22,7 @@ jobs:
       run: cargo test --verbose
     - name: Code Coverage
       run: |
+        sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libelf-dev libdw-dev cmake gcc
         wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
         tar xzf master.tar.gz &&
         cd kcov-master &&
