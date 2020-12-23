@@ -33,7 +33,9 @@ jobs:
         make install DESTDIR=../../kcov-build && \
         cd ../.. && \
         rm -rf kcov-master && \
-        cargo build && \
-        for file in target/debug/gen_gcode-*; do [ -x "${file}" ] || continue; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done && \
+        cargo build
+        ./kcov-build/usr/local/bin/kcov -version
+        #for file in target/debug/gen_gcode-*; do [ -x "${file}" ] || continue; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done && \
+        ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify target/debug/gen_gcode.rlib
         bash <(curl -s https://codecov.io/bash) && \
         echo "Uploaded code coverage"
