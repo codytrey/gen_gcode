@@ -17,6 +17,13 @@ mod tests {
     }
 
     #[test]
+    fn test_move_xyz() {
+        let p = Point3d { x: 10.0, y: 5.0, z: 0.2 };
+        let gcode = move_xyz(p, false, None, None);
+        assert_eq!("G0 X10 Y5 Z0.2\n", gcode);
+    }
+
+    #[test]
     fn test_arc_ij() {
         let p = Point2d { x: 125.0, y: 0.0 };
         let gcode = move_xy_arc_ij(Some(p), Some(62.5), None, None, false);
@@ -49,6 +56,12 @@ mod tests {
         let p = Point3d { x: 125.0, y: 125.0, z: 25.0 };
         let gcode = set_pos_3d(p, Some(90.0));
         assert_eq!("G92 X125 Y125 Z25 E90\n", gcode);
+    }
+
+    #[test]
+    fn test_reset_extruder() {
+        let gcode = reset_extruder(0.0);
+        assert_eq!("G92 E0\n", gcode);
     }
 }
 
@@ -141,6 +154,29 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: O
 
 }
 
+/// Returns a G1 or G0 command as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::{Point3d, move_xyz};
+/// 
+/// let p = Point3d { x: 10.0, y: 5.0, z: 15.0 };
+/// // move without extruding
+/// let gcode = move_xyz(p, false, None, None);
+/// assert_eq!("G0 X10 Y5 Z15\n", gcode);
+/// ```
+/// 
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::{Point3d, move_xyz};
+/// 
+/// let p = Point3d { x: 10.0, y: 5.0, z: 0.2 };
+/// // move with extrude
+/// let gcode = move_xyz(p, true, None, None);
+/// assert_eq!("G1 X10 Y5 Z0.2\n", gcode);
+/// ```
+/// 
 pub fn move_xyz(dest:Point3d, extrude: bool, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
     let f_str: String;
     let e_str: String;
@@ -284,6 +320,15 @@ pub fn set_pos_3d(pos: Point3d, extrude_pos: Option<f32>) -> String {
     return format!("G92 X{x} Y{y} Z{z}{e}\n", x=pos.x, y=pos.y, z=pos.z, e=e_str)
 }
 
+/// Returns a G92 command to set the extruder possition (E axis) as a string
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::reset_extruder;
+/// let gcode = reset_extruder(0.0);
+/// assert_eq!("G92 E0\n", gcode);
+/// ```
 pub fn reset_extruder(extrude_pos: f32) -> String {
     return format!("G92 E{}\n", extrude_pos)
 }

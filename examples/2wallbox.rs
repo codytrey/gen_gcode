@@ -27,23 +27,23 @@ fn main() {
     let print_feed_rate = Some(300);
 
     let mut file = File::create("foo.gcode").unwrap();
-    file.write(wait_bed_temp(bed_temp).as_bytes());
-    file.write(wait_hotend_temp(nozzle_temp, None).as_bytes());
-    file.write(absolute_extrution().as_bytes());
-    file.write(auto_home().as_bytes());
-    file.write(reset_extruder(0.0).as_bytes());
-    file.write(move_xyz(Point3d { x: 0.0, y: 0.0, z: 2.0 }, false, move_feed_rate, None).as_bytes());
+    file.write(wait_bed_temp(bed_temp).as_bytes()).expect("could not write to file");
+    file.write(wait_hotend_temp(nozzle_temp, None).as_bytes()).expect("could not write to file");
+    file.write(absolute_extrution().as_bytes()).expect("could not write to file");
+    file.write(auto_home().as_bytes()).expect("could not write to file");
+    file.write(reset_extruder(0.0).as_bytes()).expect("could not write to file");
+    file.write(move_xyz(Point3d { x: 0.0, y: 0.0, z: 2.0 }, false, move_feed_rate, None).as_bytes()).expect("could not write to file");
 
     let layers_z = gen_layer_heights(init_layer_hight, boxlength, layer_hight);
 
     for l in layers_z {
         let start_point: Point3d = calc_start_point(print_area_x, print_area_y, boxlength, boxlength, l);
-        file.write(move_xyz(start_point, false, move_feed_rate, None).as_bytes());
+        file.write(move_xyz(start_point, false, move_feed_rate, None).as_bytes()).expect("could not write to file");
         let permim_points = gen_2_perimiters(start_point, nozzle_size, num_walls, boxlength, boxlength);
         let mut e_dest = 0.0;
         for p in permim_points {
             e_dest += boxlength * extrude_per_travel;
-            file.write(move_xyz(p, true, print_feed_rate, Some(e_dest)).as_bytes());
+            file.write(move_xyz(p, true, print_feed_rate, Some(e_dest)).as_bytes()).expect("could not write to file");
         }
     }
     // let start_point: Point3d = calc_start_point(print_area_x, print_area_y, boxlength, boxlength, init_layer_hight);
