@@ -11,36 +11,27 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
-
     steps:
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
     - name: Run tests
       run: cargo test --verbose
+  codecov:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
     - name: Code Coverage
       run: |
-        #sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libelf-dev libdw-dev cmake gcc
-        #wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
-        #tar xzf master.tar.gz
-        #cd kcov-master
-        #mkdir build
-        #cd build
-        #cmake ..
-        #make
-        #make install DESTDIR=../../kcov-build
-        #cd ../..
-        #rm -rf kcov-master
         sudo apt-get update && sudo apt-get install kcov -y
         kcov --version
         cargo build
-        cargo install cargo-kcov
-        cargo kcov -V
-        cargo kcov -- --version
-        #for file in target/debug/gen_gcode-*; do [ -x "${file}" ] || continue; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done
-        #kcov --exclude-pattern=/.cargo,/usr/lib target/cov/gen_gcode target/debug/gen_gcode.rlib
-        cargo kcov --lib -v --no-fail-fast
+        pwd
+        for file in target/debug/gen_gcode-*[^\.d]; do echo $file; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done
         bash <(curl -s https://codecov.io/bash)
         echo "Uploaded code coverage"
