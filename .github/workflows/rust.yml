@@ -33,8 +33,8 @@ jobs:
         cargo test --no-run
         pwd
         ls -l
-        ls -l target/debug/
-        #for file in target/debug/deps/gen_gcode-*; do echo $file; mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done
-        for file in target/debug/gen_gcode-*; do echo $file; mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done
+        ls -l target/debug/deps
+        for file in target/debug/deps/gen_gcode-*; do echo $file; mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done
+        #for file in target/debug/gen_gcode-*; do echo $file; mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done
         bash <(curl -s https://codecov.io/bash)
         echo "Uploaded code coverage"
