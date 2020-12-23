@@ -104,6 +104,32 @@ mod tests {
         assert_eq!("M109 S210 T2\n", gcode);
     }
 
+    #[test]
+    fn test_set_fan_speed() {
+        //set default fan to half speed
+        let gcode = set_fan_speed(128, None);
+        assert_eq!("M106 S128\n", gcode);
+    }
+
+    #[test]
+    fn test_set_fan_speed_atl_fan() {
+        //set alternate fan to full speed
+        let gcode = set_fan_speed(u8::MAX, Some(1));
+        assert_eq!("M106 S255 P1\n", gcode);
+    }
+
+    #[test]
+    fn test_fan_off() {
+        let gcode = fan_off(None);
+        assert_eq!("M107\n", gcode);
+    }
+
+    #[test]
+    fn test_fan_off_alt_fan() {
+        let gcode = fan_off(Some(3));
+        assert_eq!("M107 P3\n", gcode);
+    }
+
 }
 
 
@@ -460,6 +486,26 @@ pub fn wait_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
     return format!("M109 S{s}{t}\n", s=temp, t=t_str)
 }
 
+/// Returns a M106 command to set the fan speed, with optional fan index, as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::set_fan_speed;
+/// 
+/// //set default fan to half speed
+/// let gcode = set_fan_speed(128, None);
+/// assert_eq!("M106 S128\n", gcode);
+/// ```
+/// 
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::set_fan_speed;
+/// 
+/// //set alternate fan to full speed
+/// let gcode = set_fan_speed(u8::MAX, Some(1));
+/// assert_eq!("M106 S255 P1\n", gcode);
+/// ```
 pub fn set_fan_speed(speed: u8, fan: Option<u8>) -> String {
     let p_str: String;
     if let Some(maybe_fan) = fan {
@@ -470,6 +516,24 @@ pub fn set_fan_speed(speed: u8, fan: Option<u8>) -> String {
     return format!("M106 S{s}{p}\n", s=speed, p=p_str)
 }
 
+/// Returns a M107 command to disable the fan, with optional fan index, as a String
+///
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::fan_off;
+///
+/// let gcode = fan_off(None);
+/// assert_eq!("M107\n", gcode);
+/// ```
+///
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::fan_off;
+///
+/// let gcode = fan_off(Some(3));
+/// assert_eq!("M107 P3\n", gcode);
+/// ```
 pub fn fan_off(fan: Option<u8>) -> String {
     let p_str: String;
     if let Some(maybe_fan) = fan {
