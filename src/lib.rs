@@ -17,6 +17,27 @@ mod tests {
     }
 
     #[test]
+    fn test_move_xy_with_f() {
+        let p = Point2d { x: 10.0, y: 5.0 };
+        let gcode = move_xy(p, false, Some(400), None);
+        assert_eq!("G0 X10 Y5 F400\n", gcode);
+    }
+
+    #[test]
+    fn test_move_xy_with_e() {
+        let p = Point2d { x: 10.0, y: 5.0 };
+        let gcode = move_xy(p, true, None, Some(5.));
+        assert_eq!("G1 X10 Y5 E5\n", gcode);
+    }
+
+    #[test]
+    fn test_move_xy_with_f_and_e() {
+        let p = Point2d { x: 10.0, y: 5.0 };
+        let gcode = move_xy(p, true, Some(400), Some(5.));
+        assert_eq!("G1 X10 Y5 E5 F400\n", gcode);
+    }
+
+    #[test]
     fn test_move_xyz() {
         let p = Point3d { x: 10.0, y: 5.0, z: 0.2 };
         let gcode = move_xyz(p, false, None, None);
@@ -24,10 +45,38 @@ mod tests {
     }
 
     #[test]
-    fn test_arc_ij() {
+    fn test_move_xyz_with_f() {
+        let p = Point3d { x: 10.0, y: 5.0, z: 0.17 };
+        let gcode = move_xyz(p, false, Some(400), None);
+        assert_eq!("G0 X10 Y5 Z0.17 F400\n", gcode);
+    }
+
+    #[test]
+    fn test_move_xyz_with_e() {
+        let p = Point3d { x: 10.0, y: 5.0, z: 0.17 };
+        let gcode = move_xyz(p, true, None, Some(5.));
+        assert_eq!("G1 X10 Y5 Z0.17 E5\n", gcode);
+    }
+
+    #[test]
+    fn test_move_xyz_with_f_and_e() {
+        let p = Point3d { x: 10.0, y: 5.0, z: 0.17 };
+        let gcode = move_xyz(p, true, Some(400), Some(5.));
+        assert_eq!("G1 X10 Y5 Z0.17 E5 F400\n", gcode);
+    }
+
+    #[test]
+    fn test_arc_ij_i() {
         let p = Point2d { x: 125.0, y: 0.0 };
         let gcode = move_xy_arc_ij(Some(p), Some(62.5), None, None, false);
         assert_eq!("G2 X125 Y0 I62.5\n", gcode);
+    }
+
+    #[test]
+    fn test_arc_ij_j() {
+        let p = Point2d { x: 125.0, y: 0.0 };
+        let gcode = move_xy_arc_ij(Some(p), None, Some(62.5), None, false);
+        assert_eq!("G2 X125 Y0 J62.5\n", gcode);
     }
 
     #[test]
@@ -130,6 +179,78 @@ mod tests {
         assert_eq!("M107 P3\n", gcode);
     }
 
+    #[test]
+    fn test_test_bed_temp() {
+        let gcode = set_bed_temp(210);
+        assert_eq!("M140 S210\n", gcode);
+    }
+
+    #[test]
+    fn test_wait_bed_temp() {
+        let gcode = wait_bed_temp(210);
+        assert_eq!("M190 S210\n", gcode);
+    }
+
+    #[test]
+    fn test_test_chamber_temp() {
+        let gcode = set_chamber_temp(50);
+        assert_eq!("M141 S50\n", gcode);
+    }
+
+    #[test]
+    fn test_wait_chamber_temp() {
+        let gcode = wait_chamber_temp(50);
+        assert_eq!("M191 S50\n", gcode);
+    }
+
+    #[test]
+    fn test_auto_home() {
+        let gcode = auto_home();
+        assert_eq!("G28\n", gcode);
+    }
+
+    #[test]
+    fn test_absolute_extrution() {
+        let gcode = absolute_extrution();
+        assert_eq!("M82\n", gcode);
+    }
+
+    #[test]
+    fn test_relative_extrution() {
+        let gcode = relative_extrution();
+        assert_eq!("M83\n", gcode);
+    }
+
+    #[test]
+    fn test_move_z() {
+        let gcode = move_z(1.8);
+        assert_eq!("G0 Z1.8\n", gcode);
+    }
+    
+    #[test]
+    fn test_relative_positioning() {
+        let gcode = relative_positioning();
+        assert_eq!("G91\n", gcode);
+    }
+    
+    #[test]
+    fn test_absolute_positioning() {
+        let gcode = absolute_positioning();
+        assert_eq!("G90\n", gcode);
+    }
+    
+    #[test]
+    fn test_use_inches() {
+        let gcode = use_inches();
+        assert_eq!("G20\n", gcode);
+    }
+    
+    #[test]
+    fn test_use_millimeters() {
+        let gcode = use_millimeters();
+        assert_eq!("G21\n", gcode);
+    }
+
 }
 
 
@@ -221,7 +342,7 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: O
 
 }
 
-/// Returns a G1 or G0 command as a String
+/// Takes a [Point3d] as input, returns a G1 or G0 command to move in 3 dimentionsReturns as a String
 /// 
 /// # Examples
 /// ```
@@ -266,8 +387,19 @@ pub fn move_xyz(dest:Point3d, extrude: bool, feed_rate: Option<u32>, flow_rate: 
 
 }
 
+/// Takes an [f32] value as a location on the Z axis to move to, Returns a G0 command
+/// Useful in layerchanges and z-hops as this function does not take arguments to extrude.
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::move_z;
+/// 
+/// let gcode = move_z(1.8);
+/// assert_eq!("G0 Z1.8\n", gcode);
+/// ```
 pub fn move_z(z: f32) -> String {
-    return format!("G0 Z{}", z)
+    return format!("G0 Z{}\n", z)
 }
 
 /// Returns a G2 or G3 command as a String
@@ -332,29 +464,65 @@ pub fn move_xy_arc_ij(dest: Option<Point2d>, x_offset: Option<f32>, y_offset: Op
 /// Returns a G21 command as a String
 ///
 /// Sets units to millimeters
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::use_millimeters;
+/// 
+/// let gcode = use_millimeters();
+/// assert_eq!("G21\n", gcode);
+/// ```
 pub fn use_millimeters() -> String {
-    return format!("G21 ; set units to millimeters\n")
+    return format!("G21\n")
 }
 
 /// Returns a G20 command as a String
 /// 
 /// Sets units to inches
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::use_inches;
+/// 
+/// let gcode = use_inches();
+/// assert_eq!("G20\n", gcode);
+/// ```
 pub fn use_inches() -> String {
-    return format!("G20 ; set units to inches\n")
+    return format!("G20\n")
 }
 
 /// Returns a G90 command as a String
 /// 
 /// sets all axes to absolute positioning (relative to home, ie. (0,0))
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::absolute_positioning;
+/// 
+/// let gcode = absolute_positioning();
+/// assert_eq!("G90\n", gcode);
+/// ```
 pub fn absolute_positioning() -> String {
-    return format!("G90 ; Set all axes to absolute\n")
+    return format!("G90\n")
 }
 
 /// Returns a G91 command as a String
 /// 
 /// sets all axes to relative positioning (relative to nozzle/tool position)
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::relative_positioning;
+/// 
+/// let gcode = relative_positioning();
+/// assert_eq!("G91\n", gcode);
+/// ```
 pub fn relative_positioning() -> String {
-    return format!("G91 ; Set all axes to relative\n")
+    return format!("G91\n")
 }
 
 /// Returns a G92 command to set the current nozzle/tool possition in the XY plane as a String
@@ -544,30 +712,99 @@ pub fn fan_off(fan: Option<u8>) -> String {
     return format!("M107{p}\n", p=p_str)
 }
 
+/// Returns a M140 command to set bed hotend temp as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::set_bed_temp;
+/// 
+/// let gcode = set_bed_temp(210);
+/// assert_eq!("M140 S210\n", gcode);
+/// ```
 pub fn set_bed_temp(temp: u8) -> String {
     return format!("M140 S{}\n", temp)
 }
 
+/// Returns a M190 command to set target bed temp to wait to reach as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::wait_bed_temp;
+/// 
+/// let gcode = wait_bed_temp(210);
+/// assert_eq!("M190 S210\n", gcode);
+/// ```
 pub fn wait_bed_temp(temp: u8) -> String {
     return format!("M190 S{}\n", temp)
 }
 
+/// Returns a M141 command to set target chamber temp as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::set_chamber_temp;
+/// 
+/// let gcode = set_chamber_temp(50);
+/// assert_eq!("M141 S50\n", gcode);
+/// ```
 pub fn set_chamber_temp(temp: u8) -> String {
     return format!("M141 S{}\n", temp)
 }
 
+
+/// Returns a M191 command to set target chamber temp to wait to reach as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::wait_chamber_temp;
+/// 
+/// let gcode = wait_chamber_temp(50);
+/// assert_eq!("M191 S50\n", gcode);
+/// ```
 pub fn wait_chamber_temp(temp: u8) -> String {
     return format!("M191 S{}\n", temp)
 }
 
+/// Returns a G28 command to trigger autohome procedure, using default parameters set in machine firmware, as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::auto_home;
+/// 
+/// let gcode = auto_home();
+/// assert_eq!("G28\n", gcode);
+/// ```
 pub fn auto_home() -> String {
     return format!("G28\n")
 }
 
+/// Returns a M82 command to set the extruder axis to absolute mode, independant of other axes, as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::absolute_extrution;
+/// 
+/// let gcode = absolute_extrution();
+/// assert_eq!("M82\n", gcode);
 pub fn absolute_extrution() -> String {
-    return format!("M82")
+    return format!("M82\n")
 }
 
+/// Returns a M83 command to set the extruder axis to relative mode, independant of other axes, as a String
+/// 
+/// # Examples
+/// ```
+/// extern crate gen_gcode;
+/// use gen_gcode::relative_extrution;
+/// 
+/// let gcode = relative_extrution();
+/// assert_eq!("M83\n", gcode);
 pub fn relative_extrution() -> String {
-    return format!("M83")
+    return format!("M83\n")
 }
