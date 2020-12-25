@@ -12,56 +12,56 @@ mod tests {
     #[test]
     fn test_move_xy() {
         let p = Point2d { x: 10.0, y: 5.0 };
-        let gcode = move_xy(p, false, None, None);
+        let gcode = move_xy(p, None, None);
         assert_eq!("G0 X10 Y5\n", gcode);
     }
 
     #[test]
     fn test_move_xy_with_f() {
         let p = Point2d { x: 10.0, y: 5.0 };
-        let gcode = move_xy(p, false, Some(400), None);
+        let gcode = move_xy(p, Some(400), None);
         assert_eq!("G0 X10 Y5 F400\n", gcode);
     }
 
     #[test]
     fn test_move_xy_with_e() {
         let p = Point2d { x: 10.0, y: 5.0 };
-        let gcode = move_xy(p, true, None, Some(5.));
+        let gcode = move_xy(p, None, Some(5.));
         assert_eq!("G1 X10 Y5 E5\n", gcode);
     }
 
     #[test]
     fn test_move_xy_with_f_and_e() {
         let p = Point2d { x: 10.0, y: 5.0 };
-        let gcode = move_xy(p, true, Some(400), Some(5.));
+        let gcode = move_xy(p, Some(400), Some(5.));
         assert_eq!("G1 X10 Y5 E5 F400\n", gcode);
     }
 
     #[test]
     fn test_move_xyz() {
         let p = Point3d { x: 10.0, y: 5.0, z: 0.2 };
-        let gcode = move_xyz(p, false, None, None);
+        let gcode = move_xyz(p, None, None);
         assert_eq!("G0 X10 Y5 Z0.2\n", gcode);
     }
 
     #[test]
     fn test_move_xyz_with_f() {
         let p = Point3d { x: 10.0, y: 5.0, z: 0.17 };
-        let gcode = move_xyz(p, false, Some(400), None);
+        let gcode = move_xyz(p, Some(400), None);
         assert_eq!("G0 X10 Y5 Z0.17 F400\n", gcode);
     }
 
     #[test]
     fn test_move_xyz_with_e() {
         let p = Point3d { x: 10.0, y: 5.0, z: 0.17 };
-        let gcode = move_xyz(p, true, None, Some(5.));
+        let gcode = move_xyz(p, None, Some(5.));
         assert_eq!("G1 X10 Y5 Z0.17 E5\n", gcode);
     }
 
     #[test]
     fn test_move_xyz_with_f_and_e() {
         let p = Point3d { x: 10.0, y: 5.0, z: 0.17 };
-        let gcode = move_xyz(p, true, Some(400), Some(5.));
+        let gcode = move_xyz(p, Some(400), Some(5.));
         assert_eq!("G1 X10 Y5 Z0.17 E5 F400\n", gcode);
     }
 
@@ -83,7 +83,7 @@ mod tests {
     fn test_arc_ij_full_circle() {
         let p = Point2d { x: 220.0, y: 110.0 };
         // Move to the point (220,110)
-        let _ = move_xy(p, false, None, None);
+        let _ = move_xy(p, None, None);
         // Make a counter clockwise circle with centerpoint at (110,110)
         let gcode = move_xy_arc_ij(None, Some(110.0), Some(110.0), Some(920.0), true);
         assert_eq!("G3 I110 J110 E920\n", gcode);
@@ -306,7 +306,7 @@ pub struct Point3d {
 /// 
 /// let p = Point2d { x: 10.0, y: 5.0 };
 /// // move without extruding
-/// let gcode = move_xy(p, false, None, None);
+/// let gcode = move_xy(p, None, None);
 /// assert_eq!("G0 X10 Y5\n", gcode);
 /// ```
 /// 
@@ -316,11 +316,11 @@ pub struct Point3d {
 /// 
 /// let p = Point2d { x: 10.0, y: 5.0 };
 /// // move with extrude
-/// let gcode = move_xy(p, true, None, None);
-/// assert_eq!("G1 X10 Y5\n", gcode);
+/// let gcode = move_xy(p, None, Some(5.0));
+/// assert_eq!("G1 X10 Y5 E5\n", gcode);
 /// ```
 /// 
-pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
+pub fn move_xy(dest:Point2d, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
     let f_str: String;
     let e_str: String;
     if let Some(maybe_feed_rate) = feed_rate {
@@ -329,16 +329,15 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: O
         f_str = format!("");
     }
     
-    if extrude {
-        if let Some(maybe_flow_rate) = flow_rate {
-            e_str = format!(" E{}", maybe_flow_rate);
-        } else {
-            e_str = format!("");
-        }
+    
+    if let Some(maybe_flow_rate) = flow_rate {
+        e_str = format!(" E{}", maybe_flow_rate);
         return format!("G1 X{x} Y{y}{e}{f}\n", x=dest.x, y=dest.y, e=e_str, f=f_str)
     } else {
         return format!("G0 X{x} Y{y}{f}\n", x=dest.x, y=dest.y, f=f_str)
     }
+
+    
 
 }
 
@@ -351,7 +350,7 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: O
 /// 
 /// let p = Point3d { x: 10.0, y: 5.0, z: 15.0 };
 /// // move without extruding
-/// let gcode = move_xyz(p, false, None, None);
+/// let gcode = move_xyz(p, None, None);
 /// assert_eq!("G0 X10 Y5 Z15\n", gcode);
 /// ```
 /// 
@@ -361,11 +360,11 @@ pub fn move_xy(dest:Point2d, extrude: bool, feed_rate: Option<u32>, flow_rate: O
 /// 
 /// let p = Point3d { x: 10.0, y: 5.0, z: 0.2 };
 /// // move with extrude
-/// let gcode = move_xyz(p, true, None, None);
-/// assert_eq!("G1 X10 Y5 Z0.2\n", gcode);
+/// let gcode = move_xyz(p, None, Some(5.0));
+/// assert_eq!("G1 X10 Y5 Z0.2 E5\n", gcode);
 /// ```
 /// 
-pub fn move_xyz(dest:Point3d, extrude: bool, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
+pub fn move_xyz(dest:Point3d, feed_rate: Option<u32>, flow_rate: Option<f32>) -> String {
     let f_str: String;
     let e_str: String;
     if let Some(maybe_feed_rate) = feed_rate {
@@ -374,12 +373,8 @@ pub fn move_xyz(dest:Point3d, extrude: bool, feed_rate: Option<u32>, flow_rate: 
         f_str = format!("");
     }
     
-    if extrude {
-        if let Some(maybe_flow_rate) = flow_rate {
-            e_str = format!(" E{}", maybe_flow_rate);
-        } else {
-            e_str = format!("");
-        }
+    if let Some(maybe_flow_rate) = flow_rate {
+        e_str = format!(" E{}", maybe_flow_rate);
         return format!("G1 X{x} Y{y} Z{z}{e}{f}\n", x=dest.x, y=dest.y, z=dest.z, e=e_str, f=f_str)
     } else {
         return format!("G0 X{x} Y{y} Z{z}{f}\n", x=dest.x, y=dest.y, z=dest.z, f=f_str)
@@ -421,7 +416,7 @@ pub fn move_z(z: f32) -> String {
 /// 
 /// let p = Point2d { x: 220.0, y: 110.0 };
 /// // Move to the point (220,110)
-/// let _ = move_xy(p, false, None, None);
+/// let _ = move_xy(p, None, None);
 /// // Make a counter clockwise circle with centerpoint at (110,110)
 /// let gcode = move_xy_arc_ij(None, Some(110.0), Some(110.0), Some(920.0), true);
 /// assert_eq!("G3 I110 J110 E920\n", gcode);
