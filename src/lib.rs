@@ -1,4 +1,5 @@
 //! Generate G-Code with funcational operation describing motion of the machine that the created gcode should produce
+mod machine;
 
 #[cfg(test)]
 mod tests {
