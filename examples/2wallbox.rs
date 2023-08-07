@@ -2,6 +2,7 @@
 extern crate gen_gcode;
 
 use gen_gcode::*;
+use gen_gcode::consts::Constants;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -29,8 +30,8 @@ fn main() {
     let mut file = File::create("foo.gcode").unwrap();
     file.write(wait_bed_temp(bed_temp).as_bytes()).expect("could not write to file");
     file.write(wait_hotend_temp(nozzle_temp, None).as_bytes()).expect("could not write to file");
-    file.write(absolute_extrution().as_bytes()).expect("could not write to file");
-    file.write(auto_home().as_bytes()).expect("could not write to file");
+    file.write(Constants::AbsoluteExtrution.as_str().as_bytes()).expect("could not write to file");
+    file.write(Constants::AutoHome.as_str().as_bytes()).expect("could not write to file");
     file.write(reset_extruder(0.0).as_bytes()).expect("could not write to file");
     file.write(move_xyz(Point3d { x: 0.0, y: 0.0, z: 2.0 }, move_feed_rate, None).as_bytes()).expect("could not write to file");
 
