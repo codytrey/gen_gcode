@@ -115,12 +115,6 @@ fn test_reset_extruder() {
 }
 
 #[test]
-fn test_rest_pos() {
-    let gcode = reset_pos();
-    assert_eq!("G92.1\n", gcode);
-}
-
-#[test]
 fn test_set_hotend_temp() {
     let gcode = set_hotend_temp(210, None);
     assert_eq!("M104 S210\n", gcode);
@@ -195,49 +189,111 @@ fn test_wait_chamber_temp() {
 }
 
 #[test]
-fn test_auto_home() {
-    let gcode = auto_home();
-    assert_eq!("G28\n", gcode);
-}
-
-#[test]
-fn test_absolute_extrution() {
-    let gcode = absolute_extrution();
-    assert_eq!("M82\n", gcode);
-}
-
-#[test]
-fn test_relative_extrution() {
-    let gcode = relative_extrution();
-    assert_eq!("M83\n", gcode);
-}
-
-#[test]
 fn test_move_z() {
     let gcode = move_z(1.8);
     assert_eq!("G0 Z1.8\n", gcode);
 }
 
-#[test]
-fn test_relative_positioning() {
-    let gcode = relative_positioning();
-    assert_eq!("G91\n", gcode);
+mod test_consts {
+    use gen_gcode::consts::Constants;
+
+    #[test]
+    fn test_auto_home() {
+        let gcode = Constants::AutoHome.as_str_end();
+        assert_eq!("G28\n", gcode);
+    }
+
+    #[test]
+    fn test_absolute_extrution() {
+        let gcode = Constants::AbsoluteExtrution.as_str_end();
+        assert_eq!("M82\n", gcode);
+    }
+
+    #[test]
+    fn test_relative_extrution() {
+        let gcode = Constants::RelativeExtrution.as_str_end();
+        assert_eq!("M83\n", gcode);
+    }
+
+    #[test]
+    fn test_relative_positioning() {
+        let gcode = Constants::RelativePos.as_str_end();
+        assert_eq!("G91\n", gcode);
+    }
+
+    #[test]
+    fn test_absolute_positioning() {
+        let gcode = Constants::AbsolutePos.as_str_end();
+        assert_eq!("G90\n", gcode);
+    }
+
+    #[test]
+    fn test_use_inches() {
+        let gcode = Constants::UseInches.as_str_end();
+        assert_eq!("G20\n", gcode);
+    }
+
+    #[test]
+    fn test_use_millimeters() {
+        let gcode = Constants::UseMillimeters.as_str_end();
+        assert_eq!("G21\n", gcode);
+    }
+
+    #[test]
+    fn test_rest_pos() {
+        let gcode = Constants::ResetPos.as_str_end();
+        assert_eq!("G92.1\n", gcode);
+    }
 }
 
-#[test]
-fn test_absolute_positioning() {
-    let gcode = absolute_positioning();
-    assert_eq!("G90\n", gcode);
-}
+mod test_consts_no_end {
+    use gen_gcode::consts::Constants;
 
-#[test]
-fn test_use_inches() {
-    let gcode = use_inches();
-    assert_eq!("G20\n", gcode);
-}
+    #[test]
+    fn test_auto_home() {
+        let gcode = Constants::AutoHome.as_str();
+        assert_eq!("G28", gcode);
+    }
 
-#[test]
-fn test_use_millimeters() {
-    let gcode = use_millimeters();
-    assert_eq!("G21\n", gcode);
+    #[test]
+    fn test_absolute_extrution() {
+        let gcode = Constants::AbsoluteExtrution.as_str();
+        assert_eq!("M82", gcode);
+    }
+
+    #[test]
+    fn test_relative_extrution() {
+        let gcode = Constants::RelativeExtrution.as_str();
+        assert_eq!("M83", gcode);
+    }
+
+    #[test]
+    fn test_relative_positioning() {
+        let gcode = Constants::RelativePos.as_str();
+        assert_eq!("G91", gcode);
+    }
+
+    #[test]
+    fn test_absolute_positioning() {
+        let gcode = Constants::AbsolutePos.as_str();
+        assert_eq!("G90", gcode);
+    }
+
+    #[test]
+    fn test_use_inches() {
+        let gcode = Constants::UseInches.as_str();
+        assert_eq!("G20", gcode);
+    }
+
+    #[test]
+    fn test_use_millimeters() {
+        let gcode = Constants::UseMillimeters.as_str();
+        assert_eq!("G21", gcode);
+    }
+
+    #[test]
+    fn test_rest_pos() {
+        let gcode = Constants::ResetPos.as_str();
+        assert_eq!("G92.1", gcode);
+    }
 }

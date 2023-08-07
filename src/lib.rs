@@ -74,11 +74,7 @@ pub fn move_xy(dest: Point2d, feed_rate: Option<u32>, flow_rate: Option<f32>) ->
 
     if let Some(maybe_flow_rate) = flow_rate {
         let e_str = format!(" E{}", maybe_flow_rate);
-        return format!(
-            "G1 X{x} Y{y}{e_str}{f_str}\n",
-            x = dest.x,
-            y = dest.y,
-        );
+        return format!("G1 X{x} Y{y}{e_str}{f_str}\n", x = dest.x, y = dest.y,);
     }
 
     format!("G0 X{x} Y{y}{f_str}\n", x = dest.x, y = dest.y)
@@ -218,70 +214,6 @@ pub fn move_xy_arc_ij(
     )
 }
 
-/// Returns a G21 command as a String
-///
-/// Sets units to millimeters
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::use_millimeters;
-///
-/// let gcode = use_millimeters();
-/// assert_eq!("G21\n", gcode);
-/// ```
-pub fn use_millimeters() -> String {
-    "G21\n".to_string()
-}
-
-/// Returns a G20 command as a String
-///
-/// Sets units to inches
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::use_inches;
-///
-/// let gcode = use_inches();
-/// assert_eq!("G20\n", gcode);
-/// ```
-pub fn use_inches() -> String {
-    "G20\n".to_string()
-}
-
-/// Returns a G90 command as a String
-///
-/// sets all axes to absolute positioning (relative to home, ie. (0,0))
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::absolute_positioning;
-///
-/// let gcode = absolute_positioning();
-/// assert_eq!("G90\n", gcode);
-/// ```
-pub fn absolute_positioning() -> String {
-    "G90\n".to_string()
-}
-
-/// Returns a G91 command as a String
-///
-/// sets all axes to relative positioning (relative to nozzle/tool position)
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::relative_positioning;
-///
-/// let gcode = relative_positioning();
-/// assert_eq!("G91\n", gcode);
-/// ```
-pub fn relative_positioning() -> String {
-    "G91\n".to_string()
-}
-
 /// Returns a G92 command to set the current nozzle/tool possition in the XY plane as a String
 ///
 /// # Examples
@@ -342,20 +274,6 @@ pub fn reset_extruder(extrude_pos: f32) -> String {
     format!("G92 E{}\n", extrude_pos)
 }
 
-/// Returns a G92.1 command to reset to machine's native possitioning offsets as a String
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::reset_pos;
-///
-/// let gcode = reset_pos();
-/// assert_eq!("G92.1\n", gcode);
-/// ```
-pub fn reset_pos() -> String {
-    "G92.1\n".to_string()
-}
-
 /// Returns a M104 command to set target hotend temp as a String
 ///
 /// # Examples
@@ -377,8 +295,8 @@ pub fn reset_pos() -> String {
 /// ```
 pub fn set_hotend_temp(temp: u16, hotend: Option<u8>) -> String {
     let t_str = match hotend {
-        Some(hotend) => format!(" T{}", hotend), 
-        None => String::new()
+        Some(hotend) => format!(" T{}", hotend),
+        None => String::new(),
     };
 
     format!("M104 S{s}{t}\n", s = temp, t = t_str)
@@ -524,42 +442,4 @@ pub fn wait_chamber_temp(temp: u8) -> String {
     format!("M191 S{}\n", temp)
 }
 
-/// Returns a G28 command to trigger autohome procedure, using default parameters set in machine firmware, as a String
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::auto_home;
-///
-/// let gcode = auto_home();
-/// assert_eq!("G28\n", gcode);
-/// ```
-pub fn auto_home() -> String {
-    "G28\n".to_string()
-}
-
-/// Returns a M82 command to set the extruder axis to absolute mode, independant of other axes, as a String
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::absolute_extrution;
-///
-/// let gcode = absolute_extrution();
-/// assert_eq!("M82\n", gcode);
-pub fn absolute_extrution() -> String {
-    "M82\n".to_string()
-}
-
-/// Returns a M83 command to set the extruder axis to relative mode, independant of other axes, as a String
-///
-/// # Examples
-/// ```
-/// extern crate gen_gcode;
-/// use gen_gcode::relative_extrution;
-///
-/// let gcode = relative_extrution();
-/// assert_eq!("M83\n", gcode);
-pub fn relative_extrution() -> String {
-    "M83\n".to_string()
-}
+pub mod consts;
